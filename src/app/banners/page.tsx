@@ -2,6 +2,22 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Sidebar from '@/components/Sidebar';
+import { 
+  Card, CardContent, CardHeader, CardTitle 
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "../../lib/utils";
+import { ExternalLink, Trash2, Pause, Play, Code2, Plus, Loader2 } from "lucide-react";
+import CustomAlert from '@/components/ui/custom-alert';
+import ConfirmationBox from '@/components/ui/confirmation-box';
 
 interface Banner {
   id: string;
@@ -51,39 +67,56 @@ function EmbedModal({ banner, baseUrl, onClose }: { banner: Banner; baseUrl: str
 ${bannerHtml}`;
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal" style={{ maxWidth: 640 }} onClick={e => e.stopPropagation()}>
-        <h2 className="modal-title">🖼️ Banner Embed Code</h2>
+    <div className="modal-backdrop bg-slate-950/80 backdrop-blur-sm fixed inset-0 flex items-center justify-center z-50 p-6" onClick={onClose}>
+      <Card className="w-full max-w-2xl bg-slate-900 border-slate-800 shadow-2xl p-0 overflow-hidden" onClick={e => e.stopPropagation()}>
+        <div className="p-8 border-b border-white/5">
+          <h2 className="text-xl font-bold text-white flex items-center gap-3">
+            <Code2 className="w-5 h-5 text-blue-400" />
+            Banner Embed Code
+          </h2>
+        </div>
         
-        <div style={{ background: 'rgba(255,255,255,0.05)', padding: 16, borderRadius: 8, marginBottom: 20 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-            <input type="checkbox" id="floating-toggle" checked={isFloating} onChange={e => setIsFloating(e.target.checked)} />
-            <label htmlFor="floating-toggle" style={{ fontWeight: 600, cursor: 'pointer' }}>Make it a Floating Banner</label>
+        <div className="p-8 space-y-6">
+          <div className="bg-white/5 p-6 rounded-2xl border border-white/5 space-y-4">
+            <div className="flex items-center gap-3">
+              <input 
+                type="checkbox" 
+                id="floating-toggle" 
+                className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-blue-500"
+                checked={isFloating} 
+                onChange={e => setIsFloating(e.target.checked)} 
+              />
+              <label htmlFor="floating-toggle" className="text-sm font-bold text-slate-200 cursor-pointer uppercase tracking-widest">Floating Interaction Mode</label>
+            </div>
+
+            {isFloating && (
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Screen Position</label>
+                <select className="w-full h-10 bg-slate-800 border-slate-700 rounded-xl text-sm px-4 outline-none focus:border-blue-500 transition-colors" value={position} onChange={e => setPosition(e.target.value)}>
+                  <option value="bottom-right">Bottom Right</option>
+                  <option value="bottom-left">Bottom Left</option>
+                  <option value="top-right">Top Right</option>
+                  <option value="top-left">Top Left</option>
+                </select>
+              </div>
+            )}
           </div>
 
-          {isFloating && (
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label" style={{ fontSize: 12 }}>Position on screen</label>
-              <select className="form-select" value={position} onChange={e => setPosition(e.target.value)} style={{ padding: '4px 8px', fontSize: 13 }}>
-                <option value="bottom-right">Bottom Right</option>
-                <option value="bottom-left">Bottom Left</option>
-                <option value="top-right">Top Right</option>
-                <option value="top-left">Top Left</option>
-              </select>
-            </div>
-          )}
+          <div className="space-y-3">
+            <p className="text-sm text-slate-400 font-medium">
+              Copy this HTML snippet and paste it within the <code className="text-blue-400 bg-blue-400/10 px-1.5 py-0.5 rounded">&lt;body&gt;</code> of your website:
+            </p>
+            <pre className="p-6 bg-black/40 border border-white/5 rounded-2xl text-[12px] font-mono text-blue-300 overflow-x-auto leading-relaxed shadow-inner">
+              {html}
+            </pre>
+          </div>
         </div>
-
-        <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>
-          Copy this HTML snippet and paste it inside the <code style={{ color: 'var(--accent)' }}>&lt;body&gt;</code>:
-        </p>
-        <pre className="code-block" style={{ maxHeight: 150, overflow: 'auto' }}>{html}</pre>
         
-        <div style={{ marginTop: 24, display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-          <button className="btn btn-primary" onClick={() => { navigator.clipboard.writeText(html); }}>Copy Code</button>
-          <button className="btn btn-ghost" onClick={onClose}>Close</button>
+        <div className="p-8 bg-slate-900/50 border-t border-white/5 flex items-center justify-end gap-3">
+          <button className="h-10 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold transition-all shadow-lg shadow-blue-600/20" onClick={() => { navigator.clipboard.writeText(html); }}>Copy Snippet</button>
+          <button className="h-10 px-6 rounded-xl bg-white/5 hover:bg-white/10 text-white text-sm font-bold border border-white/10 transition-all font-mono" onClick={onClose}>Dismiss</button>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
@@ -97,6 +130,8 @@ export default function BannersPage() {
   const [saving, setSaving] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [form, setForm] = useState({ name: '', imageUrl: '', targetUrl: '', size: '300x250', campaignId: '' });
+  const [alert, setAlert] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
 
   const load = () => {
@@ -104,7 +139,14 @@ export default function BannersPage() {
     Promise.all([
       fetch('/api/banners').then(r => r.json()),
       fetch('/api/campaigns').then(r => r.json()),
-    ]).then(([b, c]) => { setBanners(b); setCampaigns(c); setLoading(false); });
+    ]).then(([b, c]) => { 
+      setBanners(Array.isArray(b) ? b : []); 
+      setCampaigns(Array.isArray(c) ? c : []); 
+      setLoading(false); 
+    }).catch(err => {
+      console.error(err);
+      setLoading(false);
+    });
   };
 
   useEffect(() => { load(); }, []);
@@ -115,18 +157,17 @@ export default function BannersPage() {
 
     let finalImageUrl = form.imageUrl;
 
-    // If a file is selected, upload it to Supabase Storage first
     if (file) {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
       const filePath = `${fileName}`;
 
-      const { data, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from('banners')
         .upload(filePath, file);
 
       if (error) {
-        alert('Error uploading image: ' + error.message);
+        setAlert({ message: 'Error uploading image: ' + error.message, type: 'error' });
         setSaving(false);
         return;
       }
@@ -139,7 +180,7 @@ export default function BannersPage() {
     }
 
     if (!finalImageUrl) {
-        alert('Please provide an image URL or upload a file.');
+        setAlert({ message: 'Please provide an image URL or upload a file.', type: 'error' });
         setSaving(false);
         return;
     }
@@ -150,6 +191,7 @@ export default function BannersPage() {
       body: JSON.stringify({ ...form, imageUrl: finalImageUrl }),
     });
 
+    setAlert({ message: 'Banner deployed successfully', type: 'success' });
     setSaving(false);
     setShowCreate(false);
     setFile(null);
@@ -158,159 +200,242 @@ export default function BannersPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this banner?')) return;
-    await fetch(`/api/banners/${id}`, { method: 'DELETE' });
-    load();
+    setSaving(true);
+    try {
+      await fetch(`/api/banners/${id}`, { method: 'DELETE' });
+      setAlert({ message: 'Creative asset removed', type: 'success' });
+      load();
+    } catch (err) {
+      setAlert({ message: 'Failed to delete asset', type: 'error' });
+    } finally {
+      setSaving(false);
+      setConfirmDelete(null);
+    }
   };
 
   const sizes = ['300x250', '250x250', '300x300', '728x90', '160x600', '320x50', '468x60', '970x90', '125x125'];
 
   return (
-    <div className="app-shell">
+    <div className="bg-[#020617] text-slate-50 flex min-h-screen">
       <Sidebar />
-      <main className="main-content">
-        <div className="page-header">
+      <main className="flex-1 min-h-screen bg-[#020617] overflow-y-auto relative">
+        {alert && (
+          <CustomAlert 
+            message={alert.message} 
+            type={alert.type} 
+            onClose={() => setAlert(null)} 
+          />
+        )}
+        
+        {confirmDelete && (
+          <ConfirmationBox 
+            title="Delete Asset"
+            description="Are you sure you want to permanently delete this creative asset? This action cannot be undone."
+            onConfirm={() => handleDelete(confirmDelete)}
+            onCancel={() => setConfirmDelete(null)}
+            confirmText="Delete"
+            loading={saving}
+          />
+        )}
+
+        <div className="px-10 py-8 flex items-center justify-between border-b border-white/5 bg-[#020617]/80 backdrop-blur-md sticky top-0 z-10">
           <div>
-            <h1 className="page-title">Banners</h1>
-            <p className="page-subtitle">Create banners and generate embed codes for external websites</p>
+            <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">Banners</h1>
+            <p className="text-sm text-slate-400 font-medium mt-1 uppercase tracking-widest text-[10px]">Registry • Creative Asset Management</p>
           </div>
-          <button className="btn btn-primary" onClick={() => setShowCreate(true)}>+ New Banner</button>
+          <button className="h-10 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold transition-all shadow-lg shadow-blue-600/20 active:scale-95 flex items-center gap-2" onClick={() => setShowCreate(true)}>
+            <Plus className="w-4 h-4" />
+            New Banner
+          </button>
         </div>
-        <div className="page-body">
+
+        <div className="px-10 py-10">
           {loading ? (
-            <div className="loading-wrap"><div className="loading-spinner" /></div>
+            <div className="flex h-[60vh] items-center justify-center">
+              <div className="w-8 h-8 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+            </div>
           ) : banners.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">🖼️</div>
-              <p style={{ fontWeight: 600, marginBottom: 6 }}>No banners yet</p>
-              <p style={{ fontSize: 13, marginBottom: 20 }}>Add your first banner to generate a tracking embed code</p>
-              <button className="btn btn-primary" onClick={() => setShowCreate(true)}>+ New Banner</button>
+            <div className="flex flex-col items-center justify-center h-[50vh] text-center border-2 border-dashed border-white/5 rounded-3xl bg-white/[0.01]">
+              <div className="w-16 h-16 rounded-2xl bg-slate-900 flex items-center justify-center text-3xl mb-6 shadow-xl border border-white/5">🖼️</div>
+              <p className="text-lg font-bold text-slate-200">No creative assets yet</p>
+              <p className="text-sm text-slate-500 mt-2 max-w-xs leading-relaxed">Add your first banner to generate professional tracking embed codes for your clients.</p>
+              <button className="mt-8 h-11 px-8 rounded-xl bg-white/5 hover:bg-white/10 text-white text-sm font-bold border border-white/10 transition-all uppercase tracking-widest text-[10px]" onClick={() => setShowCreate(true)}>
+                Create First Banner
+              </button>
             </div>
           ) : (
-            <div className="table-wrap">
-              <table>
-                <thead>
-                  <tr><th>Banner</th><th>Campaign</th><th>Size</th><th>Total Impr</th><th>Unique Impr</th><th>Clicks</th><th>Status</th><th>Actions</th></tr>
-                </thead>
-                <tbody>
+            <Card className="border-slate-800/60 bg-slate-900/40 backdrop-blur-md shadow-xl rounded-2xl overflow-hidden">
+              <div className="overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-white/[0.01]">
+                  <TableRow className="border-white/5 hover:bg-transparent">
+                    <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 py-5 px-6 tracking-widest">Creative Detail</TableHead>
+                    <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 px-6 tracking-widest">Campaign</TableHead>
+                    <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 px-6 tracking-widest">Dimension</TableHead>
+                    <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 text-right px-6 tracking-widest">Total Impr</TableHead>
+                    <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 text-right px-6 tracking-widest">Unique Impr</TableHead>
+                    <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 px-6 tracking-widest">Insights</TableHead>
+                    <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 px-6 tracking-widest">Status</TableHead>
+                    <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 text-right px-6 tracking-widest">Manage</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {banners.map(b => {
                     const imp = Number(b.impressions);
                     const clk = Number(b.clicks);
                     const ctr = imp > 0 ? ((clk / imp) * 100).toFixed(1) : '0.0';
                     return (
-                      <tr key={b.id}>
-                        <td>
-                          <div style={{ fontWeight: 600 }}>{b.name}</div>
-                          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{new URL(b.target_url).hostname}</div>
-                        </td>
-                        <td><span className="chip">{b.campaign_name}</span></td>
-                        <td>{b.size || '—'}</td>
-                        <td>{imp.toLocaleString()}</td>
-                        <td>{Number((b as any).unique_impressions || 0).toLocaleString()}</td>
-                        <td>{clk.toLocaleString()} <span className="badge badge-blue" style={{ marginLeft: 4 }}>{ctr}%</span></td>
-                        <td>
+                      <TableRow key={b.id} className="border-white/5 hover:bg-white/[0.01] transition-colors group">
+                        <TableCell className="px-6 py-6 border-b border-white/5">
+                          <div className="font-bold text-slate-200 group-hover:text-blue-400 transition-colors uppercase tracking-tight text-sm">{b.name}</div>
+                          <div className="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-widest opacity-60">{new URL(b.target_url).hostname}</div>
+                        </TableCell>
+                        <TableCell className="px-6 border-b border-white/5">
+                          <Badge variant="outline" className="border-slate-800 bg-slate-900 text-slate-400 text-[9px] tracking-widest uppercase py-0.5 px-2">
+                            {b.campaign_name}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="px-6 border-b border-white/5 text-slate-400 font-mono text-[10px]">{b.size || '—'}</TableCell>
+                        <TableCell className="px-6 border-b border-white/5 text-right tabular-nums font-bold text-slate-200">{imp.toLocaleString()}</TableCell>
+                        <TableCell className="px-6 border-b border-white/5 text-right tabular-nums font-bold text-slate-200">{Number((b as any).unique_impressions || 0).toLocaleString()}</TableCell>
+                        <TableCell className="px-6 border-b border-white/5">
+                          <div className="flex flex-col gap-1.5">
+                            <div className="text-[9px] font-black text-slate-500 uppercase tracking-[0.1em]">{clk.toLocaleString()} CLICKS</div>
+                            <div className="w-24 h-1 bg-white/5 rounded-full overflow-hidden">
+                              <div className="h-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] transition-all duration-500" style={{ width: `${Math.min(Number(ctr) * 10, 100)}%` }} />
+                            </div>
+                            <span className="text-[10px] font-bold text-blue-400">{ctr}% CTR</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="px-6 border-b border-white/5">
                           {b.is_active ? (
                             imp > 0 ? (
-                              <span className="badge badge-green">Active</span>
+                              <div className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                                <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Active</span>
+                              </div>
                             ) : (
-                              <span className="badge badge-blue">Pending</span>
+                              <div className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                                <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest">Live</span>
+                              </div>
                             )
                           ) : (
-                            <span className="badge badge-red">Paused</span>
+                            <div className="flex items-center gap-2">
+                              <div className="w-1.5 h-1.5 rounded-full bg-slate-700" />
+                              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Paused</span>
+                            </div>
                           )}
-                        </td>
-                        <td style={{ display: 'flex', gap: 6 }}>
-                          <button 
-                            className={`btn btn-sm ${b.is_active ? 'btn-ghost' : 'btn-primary'}`} 
-                            style={{ minWidth: 80 }}
-                            onClick={async () => {
-                              await fetch(`/api/banners/${b.id}`, {
-                                method: 'PUT',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ ...b, isActive: !b.is_active })
-                              });
-                              load();
-                            }}
-                          >
-                            {b.is_active ? '⏸ Pause' : '▶️ Resume'}
-                          </button>
-                          <button className="btn btn-ghost btn-sm" onClick={() => setEmbedBanner(b)}>{'</>'}  Code</button>
-                          <button className="btn btn-danger btn-sm" onClick={() => handleDelete(b.id)}>Delete</button>
-                        </td>
-                      </tr>
+                        </TableCell>
+                        <TableCell className="px-6 border-b border-white/5 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button 
+                              className={cn(
+                                "h-8 px-4 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all",
+                                b.is_active ? "bg-white/5 hover:bg-white/10 text-slate-300" : "bg-blue-600 hover:bg-blue-500 text-white"
+                              )}
+                              onClick={async () => {
+                                await fetch(`/api/banners/${b.id}`, {
+                                  method: 'PUT',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ ...b, isActive: !b.is_active })
+                                });
+                                load();
+                              }}
+                            >
+                              {b.is_active ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                            </button>
+                            <button className="h-8 w-8 rounded-lg bg-white/5 hover:bg-blue-500/20 text-slate-400 hover:text-blue-400 transition-all flex items-center justify-center" onClick={() => setEmbedBanner(b)}>
+                              <Code2 className="w-3.5 h-3.5" />
+                            </button>
+                            <button className="h-8 w-8 rounded-lg bg-white/5 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition-all flex items-center justify-center" onClick={() => setConfirmDelete(b.id)}>
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
                     );
                   })}
-                </tbody>
-              </table>
-            </div>
+                </TableBody>
+              </Table>
+              </div>
+            </Card>
           )}
         </div>
-      </main>
 
-      {showCreate && (
-        <div className="modal-backdrop" onClick={() => setShowCreate(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <h2 className="modal-title">New Banner</h2>
-            <form onSubmit={handleCreate}>
-              <div className="form-group">
-                <label className="form-label">Banner Name *</label>
-                <input className="form-input" placeholder="e.g. Homepage Leaderboard" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
+        {showCreate && (
+          <div className="modal-backdrop bg-slate-950/90 backdrop-blur-md fixed inset-0 flex items-center justify-center z-50 p-6" onClick={() => setShowCreate(false)}>
+            <Card className="modal w-full max-w-lg bg-slate-900 border-slate-800 shadow-2xl p-0 overflow-hidden rounded-3xl" onClick={e => e.stopPropagation()}>
+              <div className="p-8 border-b border-white/5 bg-white/[0.01]">
+                <h2 className="text-xl font-bold text-white flex items-center gap-3 italic tracking-tight">
+                  <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center not-italic">
+                    <Plus className="w-4 h-4 text-white" />
+                  </div>
+                  New Creative Asset
+                </h2>
               </div>
-              <div className="form-group">
-                <label className="form-label">Campaign *</label>
-                <select className="form-select" value={form.campaignId} onChange={e => setForm(f => ({ ...f, campaignId: e.target.value }))} required>
-                  <option value="">Select a campaign…</option>
-                  {campaigns.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
-              </div>
-              <div className="form-group" style={{ border: '1px dashed rgba(255,255,255,0.1)', padding: 12, borderRadius: 8, background: 'rgba(255,255,255,0.02)' }}>
-                <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  Banner Image
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Upload file or use URL</span>
-                </label>
-                
-                <input 
-                  type="file" 
-                  accept="image/png, image/jpeg, image/gif" 
-                  onChange={e => setFile(e.target.files?.[0] || null)}
-                  style={{ fontSize: 13, marginBottom: 12, display: 'block' }} 
-                />
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '10px 0' }}>
-                    <div style={{ height: 1, flex: 1, background: 'rgba(255,255,255,0.05)' }}></div>
-                    <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1 }}>OR USE URL</span>
-                    <div style={{ height: 1, flex: 1, background: 'rgba(255,255,255,0.05)' }}></div>
+              <form onSubmit={handleCreate} className="p-8 space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Asset Identity</label>
+                  <input className="w-full h-12 bg-slate-800 border-slate-700/50 rounded-2xl px-5 text-sm outline-none focus:border-blue-500 transition-all shadow-inner placeholder:text-slate-600" placeholder="e.g. Q1 Global Promo" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
                 </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Parent Campaign</label>
+                  <select className="w-full h-12 bg-slate-800 border-slate-700/50 rounded-2xl px-5 text-sm outline-none focus:border-blue-500 transition-all cursor-pointer appearance-none shadow-inner" value={form.campaignId} onChange={e => setForm(f => ({ ...f, campaignId: e.target.value }))} required>
+                    <option value="">Select Target...</option>
+                    {campaigns.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+                <div className="p-6 bg-black/20 rounded-3xl border border-white/5 space-y-5">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex justify-between px-1">
+                    Visual Blueprint
+                    <span className="text-blue-500/60 lowercase font-bold">upload or stream</span>
+                  </label>
+                  
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={e => setFile(e.target.files?.[0] || null)}
+                    className="block w-full text-[10px] text-slate-400 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:uppercase file:bg-blue-600 file:text-white hover:file:bg-blue-500 file:transition-all cursor-pointer file:tracking-widest"
+                  />
 
-                <input 
-                  className="form-input" 
-                  placeholder="https://example.com/ad.gif" 
-                  value={form.imageUrl} 
-                  onChange={e => setForm(f => ({ ...f, imageUrl: e.target.value }))} 
-                  disabled={!!file}
-                />
-                <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>Supports .jpg, .png, and animated .gif</p>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Click Destination URL *</label>
-                <input className="form-input" placeholder="https://yoursite.com/landing" value={form.targetUrl} onChange={e => setForm(f => ({ ...f, targetUrl: e.target.value }))} required />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Size</label>
-                <select className="form-select" value={form.size} onChange={e => setForm(f => ({ ...f, size: e.target.value }))}>
-                  {sizes.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-                <button type="button" className="btn btn-ghost" onClick={() => setShowCreate(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving…' : 'Create Banner'}</button>
-              </div>
-            </form>
+                  <div className="flex items-center gap-4 opacity-20">
+                      <div className="h-px flex-1 bg-white" />
+                      <span className="text-[8px] font-black text-white uppercase tracking-widest">OR</span>
+                      <div className="h-px flex-1 bg-white" />
+                  </div>
+
+                  <input 
+                    className="w-full h-11 bg-slate-800/40 border-slate-700/30 rounded-xl px-5 text-[11px] font-mono outline-none focus:border-blue-500/50 transition-all shadow-inner placeholder:text-slate-700" 
+                    placeholder="Direct URL (static/animated)..." 
+                    value={form.imageUrl} 
+                    onChange={e => setForm(f => ({ ...f, imageUrl: e.target.value }))} 
+                    disabled={!!file}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Landing Protocol</label>
+                  <input className="w-full h-12 bg-slate-800 border-slate-700/50 rounded-2xl px-5 text-sm outline-none focus:border-blue-500 transition-all font-mono text-blue-400/80 shadow-inner" placeholder="https://external-site.com" value={form.targetUrl} onChange={e => setForm(f => ({ ...f, targetUrl: e.target.value }))} required />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Geometric Size</label>
+                  <select className="w-full h-12 bg-slate-800 border-slate-700/50 rounded-2xl px-5 text-sm outline-none focus:border-blue-500 transition-all cursor-pointer appearance-none shadow-inner" value={form.size} onChange={e => setForm(f => ({ ...f, size: e.target.value }))}>
+                    {sizes.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+                <div className="pt-6 flex items-center gap-4 border-t border-white/5">
+                  <button type="submit" className="flex-1 h-12 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black uppercase tracking-[0.2em] transition-all shadow-xl shadow-blue-600/20 active:scale-95 disabled:opacity-50" disabled={saving}>
+                    {saving ? 'Syncing...' : 'Deploy Asset'}
+                  </button>
+                  <button type="button" className="h-12 px-8 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-400 text-xs font-black uppercase tracking-[0.2em] border border-white/10 transition-all" onClick={() => setShowCreate(false)}>Abort</button>
+                </div>
+              </form>
+            </Card>
           </div>
-        </div>
-      )}
+        )}
 
-      {embedBanner && <EmbedModal banner={embedBanner} baseUrl={baseUrl} onClose={() => setEmbedBanner(null)} />}
+        {embedBanner && <EmbedModal banner={embedBanner} baseUrl={baseUrl} onClose={() => setEmbedBanner(null)} />}
+      </main>
     </div>
   );
 }

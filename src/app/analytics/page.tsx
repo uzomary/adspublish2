@@ -1,10 +1,39 @@
 'use client';
 import { useEffect, useState, useMemo } from 'react';
 import Sidebar from '@/components/Sidebar';
-import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, Cell
+import { 
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, 
+  BarChart, Bar, ResponsiveContainer 
 } from 'recharts';
+import { cn } from "../../lib/utils";
+import { 
+  Card, CardContent, CardDescription, CardHeader, CardTitle 
+} from "@/components/ui/card";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from "@/components/ui/chart";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Eye, MousePointer2, Globe, Zap, Target, User, Home } from "lucide-react";
 
 interface Analytics {
   summary: { 
@@ -34,51 +63,69 @@ interface Analytics {
 }
 interface Campaign { id: string; name: string; }
 
+const chartConfig = {
+  impressions: {
+    label: "Impressions",
+    color: "var(--chart-1)",
+  },
+  uniques: {
+    label: "Unique Reach",
+    color: "var(--chart-2)",
+  },
+  clicks: {
+    label: "Clicks",
+    color: "var(--chart-3)",
+  },
+} satisfies ChartConfig;
+
 export default function AnalyticsPage() {
   const [data, setData] = useState<Analytics | null>(null);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [campaignId, setCampaignId] = useState('');
+  const [campaignId, setCampaignId] = useState('all');
   const [days, setDays] = useState('30');
   const [loading, setLoading] = useState(true);
 
   const load = (cid: string, d: string) => {
     setLoading(true);
     const params = new URLSearchParams({ days: d });
-    if (cid) params.set('campaignId', cid);
+    if (cid && cid !== 'all') params.set('campaignId', cid);
     Promise.all([
       fetch(`/api/analytics?${params}`).then(r => r.json()),
       fetch('/api/campaigns').then(r => r.json()),
     ]).then(([a, c]) => { setData(a); setCampaigns(c); setLoading(false); });
   };
 
-  useEffect(() => { load('', '30'); }, []);
+  useEffect(() => { load('all', '30'); }, []);
 
-  const handleFilter = (cid: string, d: string) => {
-    setCampaignId(cid); setDays(d); load(cid, d);
+  const handleFilterCampaign = (val: string | null) => {
+    if (val) {
+      setCampaignId(val); load(val, days);
+    }
+  };
+
+  const handleFilterDays = (val: string | null) => {
+    if (val) {
+      setDays(val); load(campaignId, val);
+    }
   };
 
   const s = data?.summary;
   const rawDaily = data?.daily ?? [];
 
-  // Format data for Recharts & Fill missing days
   const daily = useMemo(() => {
     const daysToCover = parseInt(days);
     const result = [];
     const now = new Date();
-    
-    // Create a map of existing data
     const dataMap = new Map();
     rawDaily.forEach(d => {
       const dateKey = new Date(d.date).toISOString().split('T')[0];
       dataMap.set(dateKey, d);
     });
 
-    // Fill last N days
     for (let i = daysToCover - 1; i >= 0; i--) {
       const d = new Date();
       d.setDate(now.getDate() - i);
       const dateKey = d.toISOString().split('T')[0];
-      
       const existing = dataMap.get(dateKey);
       result.push({
         date: dateKey,
@@ -93,171 +140,209 @@ export default function AnalyticsPage() {
     return result;
   }, [rawDaily, days]);
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="card" style={{ padding: '10px 14px', border: '1px solid var(--border-bright)', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.4)', background: 'var(--bg-secondary)' }}>
-          <p style={{ fontSize: 11, fontWeight: 700, marginBottom: 6, color: 'var(--text-secondary)' }}>{label}</p>
-          {payload.map((p: any) => (
-            <div key={p.name} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: p.color }}>
-               <span style={{ fontSize: 16 }}>●</span>
-               <span style={{ fontWeight: 600 }}>{p.value.toLocaleString()}</span>
-               <span style={{ fontSize: 11, opacity: 0.8 }}>{p.name}</span>
-            </div>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
-
   return (
-    <div className="app-shell">
+    <div className="bg-[#020617] text-slate-50 flex min-h-screen">
       <Sidebar />
-      <main className="main-content">
-        <div className="page-header">
+      <main className="flex-1 min-h-screen bg-[#020617] overflow-y-auto">
+        <div className="px-10 py-8 flex items-center justify-between border-b border-white/5 bg-[#020617]/80 backdrop-blur-md sticky top-0 z-10">
           <div>
-            <h1 className="page-title">Analytics</h1>
-            <p className="page-subtitle">Detailed performance metrics for your campaigns and banners</p>
+            <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">Analytics</h1>
+            <p className="text-sm text-slate-400 font-medium mt-1">Real-time performance metrics & audience insights</p>
           </div>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <select className="form-select" style={{ width: 180 }} value={campaignId} onChange={e => handleFilter(e.target.value, days)}>
-              <option value="">All Campaigns</option>
-              {campaigns.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-            <select className="form-select" style={{ width: 130 }} value={days} onChange={e => handleFilter(campaignId, e.target.value)}>
-              <option value="7">Last 7 days</option>
-              <option value="30">Last 30 days</option>
-              <option value="90">Last 90 days</option>
-            </select>
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Campaign</span>
+              <Select value={campaignId} onValueChange={handleFilterCampaign}>
+                <SelectTrigger className="w-[200px] h-10 bg-slate-900/50 border-slate-800 hover:border-slate-700 transition-colors">
+                  <SelectValue placeholder="Campaign" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-900 border-slate-800 text-slate-200">
+                  <SelectItem value="all">Global Overview</SelectItem>
+                  {campaigns.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Range</span>
+              <Select value={days} onValueChange={handleFilterDays}>
+                <SelectTrigger className="w-[140px] h-10 bg-slate-900/50 border-slate-800 hover:border-slate-700 transition-colors">
+                  <SelectValue placeholder="Timeframe" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-900 border-slate-800 text-slate-200">
+                  <SelectItem value="7">Past 7 Days</SelectItem>
+                  <SelectItem value="30">Past 30 Days</SelectItem>
+                  <SelectItem value="90">Past 90 Days</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
-        <div className="page-body">
+
+        <div className="px-10 py-10 space-y-10">
           {loading ? (
-            <div className="loading-wrap"><div className="loading-spinner" /></div>
+            <div className="flex h-[60vh] items-center justify-center"><div className="w-10 h-10 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" /></div>
           ) : (
             <>
-              <div className="stat-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-5">
                 {[
-                  { label: 'Total Impr', value: Number(s?.total_impressions ?? 0).toLocaleString(), icon: '👁️', color: 'var(--accent)' },
-                  { label: 'Unique Impr', value: Number(s?.unique_impressions ?? 0).toLocaleString(), icon: '👤', color: 'var(--accent)' },
-                  { label: 'Clicks', value: Number(s?.total_clicks ?? 0).toLocaleString(), icon: '🖱️', color: 'var(--green)' },
-                  { label: 'Total Visits', value: Number(s?.total_visits ?? 0).toLocaleString(), icon: '🌐', color: 'var(--purple)' },
-                  { label: 'Unique Visitors', value: Number(s?.unique_visits ?? 0).toLocaleString(), icon: '🏠', color: 'var(--purple-light)' },
-                  { label: 'Actions', value: Number(s?.total_actions ?? 0).toLocaleString(), icon: '⚡', color: 'var(--orange)' },
-                  { label: 'CTR', value: `${s?.ctr ?? '0.00'}%`, icon: '🎯', color: 'var(--red)' },
+                  { label: 'Impressions', value: Number(s?.total_impressions ?? 0).toLocaleString(), icon: <Eye className="w-4 h-4" />, color: "text-blue-400", bg: "bg-blue-400/10" },
+                  { label: 'Unique Reach', value: Number(s?.unique_impressions ?? 0).toLocaleString(), icon: <User className="w-4 h-4" />, color: "text-purple-400", bg: "bg-purple-400/10" },
+                  { label: 'Clicks', value: Number(s?.total_clicks ?? 0).toLocaleString(), icon: <MousePointer2 className="w-4 h-4" />, color: "text-emerald-400", bg: "bg-emerald-400/10" },
+                  { label: 'Visits', value: Number(s?.total_visits ?? 0).toLocaleString(), icon: <Globe className="w-4 h-4" />, color: "text-indigo-400", bg: "bg-indigo-400/10" },
+                  { label: 'Unique Vis', value: Number(s?.unique_visits ?? 0).toLocaleString(), icon: <Home className="w-4 h-4" />, color: "text-indigo-300", bg: "bg-indigo-300/10" },
+                  { label: 'Actions', value: Number(s?.total_actions ?? 0).toLocaleString(), icon: <Zap className="w-4 h-4" />, color: "text-amber-400", bg: "bg-amber-400/10" },
+                  { label: 'CTR', value: `${s?.ctr ?? '0.00'}%`, icon: <Target className="w-4 h-4" />, color: "text-rose-400", bg: "bg-rose-400/10" },
                 ].map(st => (
-                  <div className="stat-card" key={st.label}>
-                    <div className="stat-icon">{st.icon}</div>
-                    <div className="stat-label">{st.label}</div>
-                    <div className="stat-value" style={{ color: st.color }}>{st.value}</div>
-                  </div>
+                  <Card key={st.label} className="border-slate-800/60 bg-slate-900/40 backdrop-blur-md hover:border-slate-700/80 transition-all duration-300 group shadow-lg">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                      <CardTitle className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500 group-hover:text-slate-400 transition-colors">{st.label}</CardTitle>
+                      <div className={cn("rounded-lg p-2 transition-transform duration-300 group-hover:scale-110", st.bg, st.color)}>{st.icon}</div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold tabular-nums tracking-tight">{st.value}</div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
 
-              {daily.length > 0 ? (
-                <>
-                  <div className="card" style={{ marginBottom: 24, height: 400 }}>
-                    <h2 style={{ fontSize: 15, fontWeight: 700, marginBottom: 20 }}>Market Reach (Daily)</h2>
-                    <div style={{ height: 320, width: '100%' }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={daily}>
-                                <defs>
-                                    <linearGradient id="colorImp" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.3}/>
-                                        <stop offset="95%" stopColor="var(--accent)" stopOpacity={0}/>
-                                    </linearGradient>
-                                    <linearGradient id="colorUniq" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="var(--purple)" stopOpacity={0.3}/>
-                                        <stop offset="95%" stopColor="var(--purple)" stopOpacity={0}/>
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                                <XAxis dataKey="formattedDate" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 11}} dy={10} />
-                                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 11}} dx={-10} />
-                                <Tooltip content={<CustomTooltip />} />
-                                <Area type="monotone" dataKey="impressions" stroke="var(--accent)" strokeWidth={3} fillOpacity={1} fill="url(#colorImp)" name="Total Impressions" />
-                                <Area type="monotone" dataKey="uniques" stroke="var(--purple)" strokeWidth={3} fillOpacity={1} fill="url(#colorUniq)" name="Unique Reach" />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    <div className="card" style={{ height: 400 }}>
-                      <h2 style={{ fontSize: 15, fontWeight: 700, marginBottom: 20 }}>Engagement (Clicks)</h2>
-                      <div style={{ height: 320, width: '100%' }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={daily}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                                <XAxis dataKey="formattedDate" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 11}} dy={10} />
-                                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 11}} dx={-10} />
-                                <Tooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} content={<CustomTooltip />} />
-                                <Bar dataKey="clicks" fill="var(--green)" radius={[4, 4, 0, 0]} barSize={40} name="Clicks" />
-                            </BarChart>
-                        </ResponsiveContainer>
+              <div className="grid gap-8">
+                <Card className="border-slate-800/60 bg-slate-900/40 backdrop-blur-md shadow-xl overflow-hidden">
+                  <CardHeader className="border-b border-white/5 pb-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-lg font-bold tracking-tight">Market Reach Performance</CardTitle>
+                        <CardDescription className="text-slate-500 font-medium">Daily breakdown of audience exposure and engagement</CardDescription>
+                      </div>
+                      <div className="flex items-center gap-6 text-[11px] font-bold uppercase tracking-widest">
+                        <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" /> <span className="text-slate-300">Impressions</span></div>
+                        <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]" /> <span className="text-slate-300">Unique Reach</span></div>
                       </div>
                     </div>
+                  </CardHeader>
+                  <CardContent className="h-[400px] pt-8 px-2">
+                    <ChartContainer config={chartConfig} className="h-full w-full">
+                      <AreaChart data={daily} margin={{ left: 12, right: 32, top: 12, bottom: 12 }}>
+                        <defs>
+                          <linearGradient id="fillImpr" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.25}/>
+                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                          </linearGradient>
+                          <linearGradient id="fillUniq" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#a855f7" stopOpacity={0.15}/>
+                            <stop offset="95%" stopColor="#a855f7" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid vertical={false} strokeDasharray="4 4" stroke="rgba(255,255,255,0.03)" />
+                        <XAxis dataKey="formattedDate" axisLine={false} tickLine={false} tickMargin={15} className="text-[10px] font-bold fill-slate-500" />
+                        <YAxis axisLine={false} tickLine={false} tickMargin={15} className="text-[10px] font-bold fill-slate-500" />
+                        <ChartTooltip content={<ChartTooltipContent indicator="line" className="bg-slate-900/95 border-slate-800 shadow-2xl" />} />
+                        <Area type="monotone" dataKey="impressions" fill="url(#fillImpr)" stroke="#3b82f6" strokeWidth={3} animationDuration={1500} />
+                        <Area type="monotone" dataKey="uniques" fill="url(#fillUniq)" stroke="#a855f7" strokeWidth={3} animationDuration={1500} />
+                      </AreaChart>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
 
-                    <div className="card">
-                      <h2 style={{ fontSize: 15, fontWeight: 700, marginBottom: 20 }}>Top Banners</h2>
-                      <div className="table-wrap" style={{ border: 'none' }}>
-                        <table style={{ fontSize: 13 }}>
-                          <thead>
-                            <tr><th>Name</th><th style={{ textAlign: 'right' }}>Impr</th><th style={{ textAlign: 'right' }}>Clicks</th><th style={{ textAlign: 'center' }}>Efficiency</th></tr>
-                          </thead>
-                          <tbody>
-                            {data?.topBanners.map(b => {
-                                const ctr = Number(b.impressions) > 0 ? ((Number(b.clicks) / Number(b.impressions)) * 100).toFixed(1) : '0.0';
-                                return (
-                                    <tr key={b.id}>
-                                        <td style={{ fontWeight: 600 }}>{b.name}</td>
-                                        <td style={{ textAlign: 'right' }}>{Number(b.impressions).toLocaleString()}</td>
-                                        <td style={{ textAlign: 'right' }}>{Number(b.clicks).toLocaleString()}</td>
-                                        <td style={{ textAlign: 'center' }}><span className="badge badge-blue">{ctr}% CTR</span></td>
-                                    </tr>
-                                )
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <Card className="border-slate-800/60 bg-slate-900/40 backdrop-blur-md shadow-xl overflow-hidden">
+                    <CardHeader className="border-b border-white/5 pb-6">
+                      <CardTitle className="text-lg font-bold tracking-tight">Active Conversions</CardTitle>
+                      <CardDescription className="text-slate-500 font-medium">Daily click-through volume across tracked banners</CardDescription>
+                    </CardHeader>
+                    <CardContent className="h-[350px] pt-8 px-2">
+                      <ChartContainer config={chartConfig} className="h-full w-full">
+                        <BarChart data={daily} margin={{ left: 12, right: 20, top: 12, bottom: 12 }}>
+                          <CartesianGrid vertical={false} strokeDasharray="4 4" stroke="rgba(255,255,255,0.03)" />
+                          <XAxis dataKey="formattedDate" axisLine={false} tickLine={false} tickMargin={15} className="text-[10px] font-bold fill-slate-500" />
+                          <YAxis axisLine={false} tickLine={false} tickMargin={15} className="text-[10px] font-bold fill-slate-500" />
+                          <ChartTooltip content={<ChartTooltipContent hideIndicator className="bg-slate-900/95 border-slate-800 shadow-2xl" />} />
+                          <Bar dataKey="clicks" fill="#10b981" radius={[4, 4, 0, 0]} barSize={36} animationDuration={1500} className="drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]" />
+                        </BarChart>
+                      </ChartContainer>
+                    </CardContent>
+                  </Card>
 
-                  <div className="card">
-                    <h2 style={{ fontSize: 15, fontWeight: 700, marginBottom: 20 }}>Detailed History</h2>
-                    <div className="table-wrap">
-                      <table style={{ fontSize: 13 }}>
-                        <thead>
-                          <tr><th>Date</th><th>Total Impr</th><th>Unique Impr</th><th>Clicks</th><th>Visits</th><th>Actions</th><th>CTR</th></tr>
-                        </thead>
-                        <tbody>
-                          {[...daily].reverse().map(d => {
+                  <Card className="border-slate-800/60 bg-slate-900/40 backdrop-blur-md shadow-xl overflow-hidden">
+                    <CardHeader className="border-b border-white/5 pb-6">
+                      <CardTitle className="text-lg font-bold tracking-tight">Top Performance Rank</CardTitle>
+                      <CardDescription className="text-slate-500 font-medium">Banners ranked by execution efficiency (CTR)</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-4">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="border-white/5 hover:bg-transparent uppercase tracking-wider">
+                            <TableHead className="text-[10px] font-extrabold text-slate-500 py-4">Identification</TableHead>
+                            <TableHead className="text-[10px] font-extrabold text-slate-500 text-right">Exposure</TableHead>
+                            <TableHead className="text-[10px] font-extrabold text-slate-500 text-right">Interactions</TableHead>
+                            <TableHead className="text-[10px] font-extrabold text-slate-500 text-center">Score</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {data?.topBanners.map(b => {
+                            const ctr = Number(b.impressions) > 0 ? ((Number(b.clicks) / Number(b.impressions)) * 100).toFixed(1) : '0.0';
+                            return (
+                              <TableRow key={b.id} className="border-white/5 hover:bg-white/[0.02] transition-colors group">
+                                <TableCell className="font-bold py-5 text-slate-300 group-hover:text-white transition-colors">{b.name}</TableCell>
+                                <TableCell className="text-right tabular-nums text-slate-400">{Number(b.impressions).toLocaleString()}</TableCell>
+                                <TableCell className="text-right tabular-nums text-slate-400">{Number(b.clicks).toLocaleString()}</TableCell>
+                                <TableCell className="text-center">
+                                  <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/5 text-emerald-400 font-mono text-[10px] tracking-tighter">
+                                    {ctr}% CTR
+                                  </Badge>
+                                </TableCell>
+                              </TableRow>
+                            )
+                          })}
+                        </TableBody>
+                      </Table>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Card className="border-slate-800/60 bg-slate-900/40 backdrop-blur-md shadow-xl overflow-hidden">
+                  <CardHeader className="border-b border-white/5 pb-6">
+                    <CardTitle className="text-lg font-bold tracking-tight">Performance Audit Log</CardTitle>
+                    <CardDescription className="text-slate-500 font-medium">Complete historical dataset for the selected timeframe</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <div className="rounded-xl border border-white/5 overflow-hidden shadow-inner">
+                      <Table>
+                        <TableHeader className="bg-white/[0.01]">
+                          <TableRow className="border-white/5 hover:bg-transparent">
+                            <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 py-4 px-6">Timestamp</TableHead>
+                            <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 text-right px-6">Total Impr</TableHead>
+                            <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 text-right px-6">Unique Reach</TableHead>
+                            <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 text-right px-6">Interactions</TableHead>
+                            <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 text-right px-6">Visits</TableHead>
+                            <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 text-center px-6">CTR</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {[...daily].reverse()
+                            .filter(d => Number(d.impressions) > 0 || Number(d.clicks) > 0 || Number(d.visits) > 0)
+                            .map(d => {
                             const imp = Number(d.impressions), clk = Number(d.clicks);
                             return (
-                              <tr key={d.date}>
-                                <td>{d.formattedDate}</td>
-                                <td>{imp.toLocaleString()}</td>
-                                <td>{Number(d.uniques || 0).toLocaleString()}</td>
-                                <td>{clk.toLocaleString()}</td>
-                                <td>{Number(d.visits).toLocaleString()}</td>
-                                <td>{Number(d.actions).toLocaleString()}</td>
-                                <td><span className="badge badge-blue">{imp > 0 ? ((clk / imp) * 100).toFixed(1) : '0.0'}%</span></td>
-                              </tr>
+                              <TableRow key={d.date} className="border-white/5 hover:bg-white/[0.02] transition-colors">
+                                <TableCell className="font-bold text-slate-400 px-6 py-4">{d.formattedDate}</TableCell>
+                                <TableCell className="text-right tabular-nums text-slate-300 px-6">{imp.toLocaleString()}</TableCell>
+                                <TableCell className="text-right tabular-nums text-slate-300 px-6">{Number(d.uniques || 0).toLocaleString()}</TableCell>
+                                <TableCell className="text-right tabular-nums text-emerald-400 px-6">{clk.toLocaleString()}</TableCell>
+                                <TableCell className="text-right tabular-nums text-slate-300 px-6">{Number(d.visits).toLocaleString()}</TableCell>
+                                <TableCell className="text-center px-6">
+                                  <Badge variant="secondary" className="font-mono text-[10px] bg-slate-800 text-slate-300 border border-slate-700">
+                                    {imp > 0 ? ((clk / imp) * 100).toFixed(1) : '0.0'}%
+                                  </Badge>
+                                </TableCell>
+                              </TableRow>
                             );
                           })}
-                        </tbody>
-                      </table>
+                        </TableBody>
+                      </Table>
                     </div>
-                  </div>
-                </>
-              ) : (
-                <div className="empty-state">
-                  <div className="empty-icon">📈</div>
-                  <p style={{ fontWeight: 600, marginBottom: 6 }}>No analytics data yet</p>
-                  <p style={{ fontSize: 13 }}>Start embedding banners and tracker scripts to see data here.</p>
-                </div>
-              )}
+                  </CardContent>
+                </Card>
+              </div>
             </>
           )}
         </div>
