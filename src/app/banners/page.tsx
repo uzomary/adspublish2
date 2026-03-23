@@ -256,7 +256,9 @@ export default function BannersPage() {
             </div>
           ) : banners.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-[50vh] text-center border-2 border-dashed border-white/5 rounded-3xl bg-white/[0.01]">
-              <div className="w-16 h-16 rounded-2xl bg-slate-900 flex items-center justify-center text-3xl mb-6 shadow-xl border border-white/5">🖼️</div>
+              <div className="w-16 h-16 rounded-2xl bg-slate-900 flex items-center justify-center text-3xl mb-6 shadow-xl border border-white/5">
+                <ExternalLink className="w-8 h-8 text-blue-500" />
+              </div>
               <p className="text-lg font-bold text-slate-200">No creative assets yet</p>
               <p className="text-sm text-slate-500 mt-2 max-w-xs leading-relaxed">Add your first banner to generate professional tracking embed codes for your clients.</p>
               <button className="mt-8 h-11 px-8 rounded-xl bg-white/5 hover:bg-white/10 text-white text-sm font-bold border border-white/10 transition-all uppercase tracking-widest text-[10px]" onClick={() => setShowCreate(true)}>
@@ -425,8 +427,8 @@ export default function BannersPage() {
                 </div>
                 <div className="pt-6 flex items-center gap-4 border-t border-white/5">
                   <button type="submit" className="flex-1 h-12 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black uppercase tracking-[0.2em] transition-all shadow-xl shadow-blue-600/20 active:scale-95 disabled:opacity-50" disabled={saving}>
-                    {saving ? 'Syncing...' : 'Deploy Asset'}
-                  </button>
+              {saving ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Deploy Asset'}
+            </button>
                   <button type="button" className="h-12 px-8 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-400 text-xs font-black uppercase tracking-[0.2em] border border-white/10 transition-all" onClick={() => setShowCreate(false)}>Abort</button>
                 </div>
               </form>

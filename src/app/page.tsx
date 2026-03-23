@@ -213,7 +213,9 @@ export default function OverviewPage() {
 
           {!loading && daily.length === 0 && (
             <div className="flex flex-col items-center justify-center h-[50vh] text-center border-2 border-dashed border-white/5 rounded-3xl bg-white/[0.01]">
-              <div className="w-16 h-16 rounded-2xl bg-slate-900 flex items-center justify-center text-3xl mb-6 shadow-xl border border-white/5">📊</div>
+              <div className="w-16 h-16 rounded-2xl bg-slate-900 flex items-center justify-center text-3xl mb-6 shadow-xl border border-white/5">
+                <TrendingUp className="w-8 h-8 text-blue-500" />
+              </div>
               <p className="text-lg font-bold text-slate-200 uppercase tracking-tight italic">Insufficient Ecosystem Data</p>
               <p className="text-sm text-slate-500 mt-2 max-w-xs leading-relaxed font-medium capitalize">Activate your banners and synchronization cycles to populate the global matrix.</p>
             </div>
