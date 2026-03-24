@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "../../lib/utils";
-import { ExternalLink, Trash2, Pause, Play, Code2, Plus, Loader2 } from "lucide-react";
+import { ExternalLink, Trash2, Pause, Play, Code2, Plus, Loader2, Pencil } from "lucide-react";
 import CustomAlert from '@/components/ui/custom-alert';
 import ConfirmationBox from '@/components/ui/confirmation-box';
 
@@ -132,6 +132,7 @@ export default function BannersPage() {
   const [form, setForm] = useState({ name: '', imageUrl: '', targetUrl: '', size: '300x250', campaignId: '' });
   const [alert, setAlert] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
 
   const load = () => {
@@ -151,7 +152,7 @@ export default function BannersPage() {
 
   useEffect(() => { load(); }, []);
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
 
@@ -185,18 +186,23 @@ export default function BannersPage() {
         return;
     }
 
-    await fetch('/api/banners', {
-      method: 'POST',
+    const res = await fetch(editingBanner ? `/api/banners/${editingBanner.id}` : '/api/banners', {
+      method: editingBanner ? 'PUT' : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...form, imageUrl: finalImageUrl }),
     });
 
-    setAlert({ message: 'Banner deployed successfully', type: 'success' });
+    if (res.ok) {
+        setAlert({ message: editingBanner ? 'Creative asset updated' : 'Banner deployed successfully', type: 'success' });
+        setShowCreate(false);
+        setEditingBanner(null);
+        setFile(null);
+        setForm({ name: '', imageUrl: '', targetUrl: '', size: '300x250', campaignId: '' });
+        load();
+    } else {
+        setAlert({ message: 'Failed to save banner', type: 'error' });
+    }
     setSaving(false);
-    setShowCreate(false);
-    setFile(null);
-    setForm({ name: '', imageUrl: '', targetUrl: '', size: '300x250', campaignId: '' });
-    load();
   };
 
   const handleDelete = async (id: string) => {
@@ -347,9 +353,22 @@ export default function BannersPage() {
                             >
                               {b.is_active ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
                             </button>
-                            <button className="h-8 w-8 rounded-lg bg-white/5 hover:bg-blue-500/20 text-slate-400 hover:text-blue-400 transition-all flex items-center justify-center" onClick={() => setEmbedBanner(b)}>
-                              <Code2 className="w-3.5 h-3.5" />
-                            </button>
+                             <button className="h-8 w-8 rounded-lg bg-white/5 hover:bg-blue-500/20 text-slate-400 hover:text-blue-400 transition-all flex items-center justify-center" onClick={() => {
+                               setEditingBanner(b);
+                               setForm({
+                                 name: b.name,
+                                 imageUrl: b.image_url,
+                                 targetUrl: b.target_url,
+                                 size: b.size,
+                                 campaignId: b.campaign_id
+                               });
+                               setShowCreate(true);
+                             }}>
+                               <Pencil className="w-3.5 h-3.5" />
+                             </button>
+                             <button className="h-8 w-8 rounded-lg bg-white/5 hover:bg-blue-500/20 text-slate-400 hover:text-blue-400 transition-all flex items-center justify-center" onClick={() => setEmbedBanner(b)}>
+                               <Code2 className="w-3.5 h-3.5" />
+                             </button>
                             <button className="h-8 w-8 rounded-lg bg-white/5 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition-all flex items-center justify-center" onClick={() => setConfirmDelete(b.id)}>
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -371,12 +390,12 @@ export default function BannersPage() {
               <div className="p-8 border-b border-white/5 bg-white/[0.01]">
                 <h2 className="text-xl font-bold text-white flex items-center gap-3 italic tracking-tight">
                   <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center not-italic">
-                    <Plus className="w-4 h-4 text-white" />
+                    {editingBanner ? <Pencil className="w-4 h-4 text-white" /> : <Plus className="w-4 h-4 text-white" />}
                   </div>
-                  New Creative Asset
+                  {editingBanner ? 'Edit Creative Asset' : 'New Creative Asset'}
                 </h2>
               </div>
-              <form onSubmit={handleCreate} className="p-8 space-y-6">
+              <form onSubmit={handleSubmit} className="p-8 space-y-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Asset Identity</label>
                   <input className="w-full h-12 bg-slate-800 border-slate-700/50 rounded-2xl px-5 text-sm outline-none focus:border-blue-500 transition-all shadow-inner placeholder:text-slate-600" placeholder="e.g. Q1 Global Promo" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
@@ -427,9 +446,13 @@ export default function BannersPage() {
                 </div>
                 <div className="pt-6 flex items-center gap-4 border-t border-white/5">
                   <button type="submit" className="flex-1 h-12 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black uppercase tracking-[0.2em] transition-all shadow-xl shadow-blue-600/20 active:scale-95 disabled:opacity-50" disabled={saving}>
-              {saving ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Deploy Asset'}
-            </button>
-                  <button type="button" className="h-12 px-8 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-400 text-xs font-black uppercase tracking-[0.2em] border border-white/10 transition-all" onClick={() => setShowCreate(false)}>Abort</button>
+                    {saving ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : (editingBanner ? 'Update Asset' : 'Deploy Asset')}
+                  </button>
+                  <button type="button" className="h-12 px-8 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-400 text-xs font-black uppercase tracking-[0.2em] border border-white/10 transition-all" onClick={() => {
+                    setShowCreate(false);
+                    setEditingBanner(null);
+                    setForm({ name: '', imageUrl: '', targetUrl: '', size: '300x250', campaignId: '' });
+                  }}>Abort</button>
                 </div>
               </form>
             </Card>
