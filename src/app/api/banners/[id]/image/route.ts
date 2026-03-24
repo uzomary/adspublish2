@@ -22,6 +22,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
           'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
           'Pragma': 'no-cache',
           'Expires': '0',
+          'Access-Control-Allow-Origin': '*',
         },
       });
     }
@@ -29,7 +30,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
     const imageUrl = rows[0].image_url;
     
     // Redirect to the actual image URL
-    // We add no-cache headers here too to force the browser to check the latest visual every time
+    // We add no-cache and CORS headers here too
     return new NextResponse(null, {
       status: 302,
       headers: {
@@ -37,6 +38,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
         'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
         'Pragma': 'no-cache',
         'Expires': '0',
+        'Access-Control-Allow-Origin': '*',
       },
     });
   } catch (error) {
