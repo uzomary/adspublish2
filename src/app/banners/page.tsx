@@ -53,7 +53,7 @@ function EmbedModal({ banner, baseUrl, onClose }: { banner: Banner; baseUrl: str
 
   const bannerHtml = `
 <a href="${trackClickUrl}" target="_blank" rel="noopener">
-  <img src="${banner.image_url}" width="${banner.size?.split('x')[0] || 'auto'}" height="${banner.size?.split('x')[1] || 'auto'}" alt="Ad" style="display:block;border:0;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.15);" />
+  <img src="${baseUrl}/api/banners/${banner.id}/image" width="${banner.size?.split('x')[0] || 'auto'}" height="${banner.size?.split('x')[1] || 'auto'}" alt="Ad" style="display:block;border:0;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.15);" />
   <img src="${trackImprUrl}" width="1" height="1" style="display:none" alt="" />
 </a>`.trim();
 
