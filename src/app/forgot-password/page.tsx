@@ -42,7 +42,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-background flex items-center justify-center p-6 relative overflow-hidden font-sans">
       <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-600/10 rounded-full blur-[120px] animate-pulse" />
       <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/10 rounded-full blur-[120px] animate-pulse delay-700" />
 
@@ -50,37 +50,37 @@ export default function ForgotPasswordPage() {
 
         {/* Left Side: Branding */}
         <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left">
-          <Link href="/login" className="inline-flex items-center gap-2 text-slate-500 hover:text-white text-[10px] font-black uppercase tracking-widest mb-12 transition-colors group" title="Back to Login">
+          <Link href="/login" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-[10px] font-black uppercase tracking-widest mb-12 transition-colors group" title="Back to Login">
             <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
             Back to Portal
           </Link>
 
-          <div className="w-24 h-24 rounded-[2rem] bg-slate-900 flex items-center justify-center shadow-2xl border border-white/5 mb-8 group hover:rotate-6 transition-transform">
+          <div className="w-24 h-24 rounded-[2rem] bg-sidebar border border-sidebar-border flex items-center justify-center shadow-2xl mb-8 group hover:rotate-6 transition-transform">
             <Mail className="w-10 h-10 text-blue-500" />
           </div>
 
           <div className="space-y-4">
             <div className="flex items-center justify-center lg:justify-start gap-3">
               <div className="h-0.5 w-8 bg-blue-500 rounded-full hidden lg:block" />
-              <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-widest">
+              <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest">
                 <Send className="w-3.5 h-3.5" />
                 Identity Recovery
               </div>
             </div>
 
-            <h1 className="text-5xl lg:text-7xl font-black text-white italic tracking-tighter uppercase leading-[0.9]">
+            <h1 className="text-5xl lg:text-7xl font-black text-foreground italic tracking-tighter uppercase leading-[0.9]">
               Restore<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">Access</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-400 dark:to-indigo-500">Access</span>
             </h1>
 
-            <p className="text-slate-400 text-sm font-medium max-w-md leading-relaxed">
+            <p className="text-muted-foreground text-sm font-medium max-w-md leading-relaxed">
               Lost your administrative synchronization key?
               Enter your verified email below to receive a secure recovery link.
             </p>
           </div>
 
-          <div className="mt-12 p-6 rounded-3xl bg-white/[0.02] border border-white/5 border-dashed max-w-sm">
-            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-relaxed">
+          <div className="mt-12 p-6 rounded-3xl bg-secondary/30 border border-border border-dashed max-w-sm">
+            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest leading-relaxed">
               Recovery links are single-use and expire after 60 minutes for security auditing purposes.
             </p>
           </div>
@@ -88,10 +88,10 @@ export default function ForgotPasswordPage() {
 
         {/* Right Side: Form */}
         <div className="w-full max-w-lg lg:max-w-md xl:max-w-lg">
-          <Card className="bg-slate-900/40 border-slate-800/60 backdrop-blur-xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] rounded-[3rem] overflow-hidden">
-            <CardHeader className="pt-12 pb-6 text-center border-b border-white/5 bg-white/[0.01]">
-              <CardTitle className="text-2xl font-bold text-white tracking-tight">Recover Identity</CardTitle>
-              <CardDescription className="text-slate-500 font-medium">Administrative Security Protocol</CardDescription>
+          <Card className="bg-card/40 border-border backdrop-blur-xl shadow-2xl rounded-[3rem] overflow-hidden">
+            <CardHeader className="pt-12 pb-6 text-center border-b border-border bg-white/[0.01]">
+              <CardTitle className="text-2xl font-bold text-foreground tracking-tight">Recover Identity</CardTitle>
+              <CardDescription className="text-muted-foreground font-medium">Administrative Security Protocol</CardDescription>
             </CardHeader>
 
             <CardContent className="p-8 lg:p-12">
@@ -114,22 +114,22 @@ export default function ForgotPasswordPage() {
                       Follow Recovery Link
                       <ArrowRight className="w-4 h-4" />
                     </Link>
-                    <p className="mt-3 text-[9px] text-slate-500 font-medium leading-relaxed">
+                    <p className="mt-3 text-[9px] text-muted-foreground font-medium leading-relaxed">
                       Note: You are seeing this because RESEND_API_KEY is not configured in your .env file.
                     </p>
                   </div>
                 )}
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Admin Email</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Admin Email</label>
                   <div className="relative group">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-blue-500 transition-colors" />
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-blue-500 transition-colors" />
                     <input
                       type="email"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-slate-950/50 border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-sm text-white placeholder:text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all font-medium"
+                      className="w-full bg-background/50 border border-border rounded-2xl py-4 pl-12 pr-4 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all font-medium"
                       placeholder="Enter email"
                     />
                   </div>
@@ -139,7 +139,7 @@ export default function ForgotPasswordPage() {
                   type="submit"
                   disabled={loading}
                   className={cn(
-                    "w-full h-14 bg-white text-[#020617] font-black uppercase tracking-[0.2em] text-[11px] rounded-2xl shadow-xl hover:bg-slate-100 disabled:opacity-50 transition-all active:scale-[0.98] flex items-center justify-center gap-3 mt-4 group",
+                    "w-full h-14 bg-primary text-primary-foreground font-black uppercase tracking-[0.2em] text-[11px] rounded-2xl shadow-xl hover:opacity-90 disabled:opacity-50 transition-all active:scale-[0.98] flex items-center justify-center gap-3 mt-4 group",
                     loading ? "cursor-wait" : ""
                   )}
                 >
@@ -156,7 +156,7 @@ export default function ForgotPasswordPage() {
             </CardContent>
           </Card>
 
-          <p className="text-center mt-12 text-[10px] font-black uppercase tracking-[0.4em] text-slate-700">
+          <p className="text-center mt-12 text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/50">
             Secure Recovery Node alpha-1
           </p>
         </div>

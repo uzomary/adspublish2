@@ -4,9 +4,12 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, FolderKanban, Image as ImageIcon, 
-  BarChart3, Settings, LogOut, ChevronLeft, ChevronRight, Menu, X 
+  BarChart3, Settings, LogOut, ChevronLeft, ChevronRight, Menu, X,
+  Sun, Moon
 } from "lucide-react";
 import { cn } from "../lib/utils";
+import { ThemeToggle } from "./theme-toggle";
+
 
 const navItems = [
   { href: '/', icon: <LayoutDashboard className="w-4 h-4" />, label: 'Overview' },
@@ -72,7 +75,7 @@ export default function Sidebar() {
       {/* Sidebar Content */}
       <aside 
         className={cn(
-          "fixed left-0 top-0 h-full bg-[#030712] border-r border-white/5 flex flex-col transition-all duration-500 z-40 group/sidebar",
+          "fixed left-0 top-0 h-full bg-sidebar border-r border-sidebar-border flex flex-col transition-all duration-500 z-40 group/sidebar",
           isCollapsed ? "w-20" : "w-64",
           "lg:translate-x-0 lg:sticky",
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
@@ -147,43 +150,56 @@ export default function Sidebar() {
 
         <div className={cn("p-4 mt-auto transition-all duration-300", isCollapsed ? "p-3" : "p-4")}>
           <div className={cn(
-            "rounded-2xl bg-slate-900/40 border border-white/5 space-y-3 transition-all duration-300",
+            "rounded-2xl bg-sidebar-accent/50 border border-sidebar-border space-y-3 transition-all duration-300",
             isCollapsed ? "p-0 bg-transparent border-0" : "p-4"
           )}>
             <div className={cn("flex items-center gap-3", isCollapsed ? "justify-center" : "")}>
-              <div className="w-8 h-8 rounded-full bg-slate-800 border border-white/10 flex-shrink-0 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-background border border-sidebar-border flex-shrink-0 flex items-center justify-center">
                 <span className="text-[10px] font-black text-blue-500">{initials}</span>
               </div>
               {!isCollapsed && (
                 <div className="flex-1 overflow-hidden transition-all duration-300">
-                  <p className="text-[11px] font-bold text-slate-200 leading-none truncate capitalize">
+                  <p className="text-[11px] font-bold text-foreground leading-none truncate capitalize">
                     {user?.name || "Member Node"}
                   </p>
-                  <p className="text-[9px] text-slate-500 font-medium tracking-tight truncate lowercase">
+                  <p className="text-[9px] text-muted-foreground font-medium tracking-tight truncate lowercase">
                     {user?.email || "initializing..."}
                   </p>
                 </div>
               )}
             </div>
             
-            <button 
-              onClick={async () => {
-                await fetch('/api/auth/logout', { method: 'POST' });
-                router.refresh();
-                router.push('/login');
-              }}
-              className={cn(
-                "w-full flex items-center justify-center gap-2 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-white hover:bg-white/5 transition-all group relative",
-                isCollapsed ? "h-10 w-10 mx-auto bg-white/5" : ""
-              )}>
-              <LogOut className="w-3 h-3" />
-              {!isCollapsed && <span>Sign Out</span>}
-              {isCollapsed && (
-                <div className="absolute left-14 bg-slate-900 border border-white/10 text-white text-[10px] px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+            <div className="flex gap-2">
+              <ThemeToggle />
+              <button 
+                onClick={async () => {
+                  await fetch('/api/auth/logout', { method: 'POST' });
+                  router.refresh();
+                  router.push('/login');
+                }}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-all group relative",
+                  isCollapsed ? "hidden" : ""
+                )}>
+                <LogOut className="w-3 h-3" />
+                <span>Sign Out</span>
+              </button>
+            </div>
+            
+            {isCollapsed && (
+              <button 
+                onClick={async () => {
+                  await fetch('/api/auth/logout', { method: 'POST' });
+                  router.refresh();
+                  router.push('/login');
+                }}
+                className="w-10 h-10 mx-auto flex items-center justify-center rounded-lg bg-sidebar-accent text-muted-foreground hover:text-foreground transition-all group relative">
+                <LogOut className="w-3 h-3" />
+                <div className="absolute left-14 bg-popover border border-border text-popover-foreground text-[10px] px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
                   Sign Out
                 </div>
-              )}
-            </button>
+              </button>
+            )}
           </div>
         </div>
       </aside>

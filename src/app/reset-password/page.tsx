@@ -157,36 +157,36 @@ export default function ResetPasswordPage() {
         
         {/* Left Side: Branding */}
         <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left">
-          <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-2xl border border-white/5 mb-8 group hover:rotate-6 transition-transform">
+          <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-2xl border border-border mb-8 group hover:rotate-6 transition-transform">
             <Lock className="w-10 h-10 text-white" />
           </div>
           
           <div className="space-y-4">
             <div className="flex items-center justify-center lg:justify-start gap-3">
               <div className="h-0.5 w-8 bg-blue-500 rounded-full hidden lg:block" />
-              <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-widest">
+              <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest">
                 <ShieldAlert className="w-3.5 h-3.5" />
                 Security Overwrite
               </div>
             </div>
             
-            <h1 className="text-5xl lg:text-7xl font-black text-white italic tracking-tighter uppercase leading-[0.9]">
+            <h1 className="text-5xl lg:text-7xl font-black text-foreground italic tracking-tighter uppercase leading-[0.9]">
               Sync New<br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">Credentials</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-400 dark:to-indigo-500">Credentials</span>
             </h1>
             
-            <p className="text-slate-400 text-sm font-medium max-w-md leading-relaxed">
+            <p className="text-muted-foreground text-sm font-medium max-w-md leading-relaxed">
               Identity verification complete. Finalize your administrative reset by providing a new master synchronization key.
             </p>
           </div>
 
           <div className="mt-12 grid grid-cols-2 gap-4 w-full max-w-sm">
-             <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 backdrop-blur-sm">
-                <div className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">Audit Log</div>
+             <div className="p-4 rounded-2xl bg-secondary/30 border border-border backdrop-blur-sm">
+                <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1">Audit Log</div>
                 <div className="text-[10px] text-emerald-500 font-bold uppercase">Token Validated</div>
              </div>
-             <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 backdrop-blur-sm">
-                <div className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">Encrypted</div>
+             <div className="p-4 rounded-2xl bg-secondary/30 border border-border backdrop-blur-sm">
+                <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1">Encrypted</div>
                 <div className="text-[10px] text-blue-500 font-bold uppercase">End-to-End SSL</div>
              </div>
           </div>
@@ -195,14 +195,14 @@ export default function ResetPasswordPage() {
         {/* Right Side: Form */}
         <div className="w-full max-w-lg lg:max-w-md xl:max-w-lg">
           <Suspense fallback={
-            <div className="w-full h-96 bg-slate-900/40 rounded-[3rem] border border-slate-800/60 flex items-center justify-center">
+            <div className="w-full h-96 bg-card/40 rounded-[3rem] border border-border flex items-center justify-center">
               <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
             </div>
           }>
             <ResetPasswordForm />
           </Suspense>
           
-          <p className="text-center mt-12 text-[10px] font-black uppercase tracking-[0.4em] text-slate-700">
+          <p className="text-center mt-12 text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/50">
             Stakers Choice Ads Recovery Engine v1.0.4
           </p>
         </div>

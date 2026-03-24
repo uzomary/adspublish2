@@ -118,9 +118,9 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="bg-[#020617] text-slate-50 flex min-h-screen">
+    <div className="bg-background text-foreground flex min-h-screen">
       <Sidebar />
-      <main className="flex-1 min-h-screen bg-[#020617] relative overflow-hidden flex flex-col">
+      <main className="flex-1 min-h-screen bg-background relative overflow-hidden flex flex-col">
         {/* Alerts & Confirmations */}
         {alert && (
           <CustomAlert 

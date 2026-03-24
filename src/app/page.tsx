@@ -64,10 +64,10 @@ export default function OverviewPage() {
   };
 
   return (
-    <div className="bg-[#020617] text-slate-50 flex min-h-screen">
+    <div className="bg-background text-foreground flex min-h-screen">
       <Sidebar />
-      <main className="flex-1 min-h-screen bg-[#020617] overflow-y-auto">
-        <div className="px-10 py-8 flex items-center justify-between border-b border-white/5 bg-[#020617]/80 backdrop-blur-md sticky top-0 z-10">
+      <main className="flex-1 min-h-screen bg-background overflow-y-auto">
+        <div className="px-10 py-8 flex items-center justify-between border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-10">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">Overview</h1>
             <p className="text-sm text-slate-400 font-medium mt-1 uppercase tracking-widest text-[10px]">Global Dashboard • 30 Day Window</p>
