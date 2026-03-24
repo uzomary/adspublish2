@@ -386,7 +386,7 @@ export default function BannersPage() {
 
         {showCreate && (
           <div className="modal-backdrop bg-slate-950/90 backdrop-blur-md fixed inset-0 flex items-center justify-center z-50 p-6" onClick={() => setShowCreate(false)}>
-            <Card className="modal w-full max-w-lg bg-slate-900 border-slate-800 shadow-2xl p-0 overflow-hidden rounded-3xl" onClick={e => e.stopPropagation()}>
+            <Card className="modal w-full max-w-2xl bg-slate-900 border-slate-800 shadow-2xl p-0 overflow-hidden rounded-3xl" onClick={e => e.stopPropagation()}>
               <div className="p-8 border-b border-white/5 bg-white/[0.01]">
                 <h2 className="text-xl font-bold text-white flex items-center gap-3 italic tracking-tight">
                   <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center not-italic">
@@ -396,16 +396,18 @@ export default function BannersPage() {
                 </h2>
               </div>
               <form onSubmit={handleSubmit} className="p-8 space-y-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Asset Identity</label>
-                  <input className="w-full h-12 bg-slate-800 border-slate-700/50 rounded-2xl px-5 text-sm outline-none focus:border-blue-500 transition-all shadow-inner placeholder:text-slate-600" placeholder="e.g. Q1 Global Promo" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Parent Campaign</label>
-                  <select className="w-full h-12 bg-slate-800 border-slate-700/50 rounded-2xl px-5 text-sm outline-none focus:border-blue-500 transition-all cursor-pointer appearance-none shadow-inner" value={form.campaignId} onChange={e => setForm(f => ({ ...f, campaignId: e.target.value }))} required>
-                    <option value="">Select Target...</option>
-                    {campaigns.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Asset Identity</label>
+                    <input className="w-full h-12 bg-slate-800 border-slate-700/50 rounded-2xl px-5 text-sm outline-none focus:border-blue-500 transition-all shadow-inner placeholder:text-slate-600" placeholder="e.g. Q1 Global Promo" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Parent Campaign</label>
+                    <select className="w-full h-12 bg-slate-800 border-slate-700/50 rounded-2xl px-5 text-sm outline-none focus:border-blue-500 transition-all cursor-pointer appearance-none shadow-inner" value={form.campaignId} onChange={e => setForm(f => ({ ...f, campaignId: e.target.value }))} required>
+                      <option value="">Select Target...</option>
+                      {campaigns.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </select>
+                  </div>
                 </div>
                 <div className="p-6 bg-black/20 rounded-3xl border border-white/5 space-y-5">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex justify-between px-1">
@@ -434,15 +436,17 @@ export default function BannersPage() {
                     disabled={!!file}
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Landing Protocol</label>
-                  <input className="w-full h-12 bg-slate-800 border-slate-700/50 rounded-2xl px-5 text-sm outline-none focus:border-blue-500 transition-all font-mono text-blue-400/80 shadow-inner" placeholder="https://external-site.com" value={form.targetUrl} onChange={e => setForm(f => ({ ...f, targetUrl: e.target.value }))} required />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Geometric Size</label>
-                  <select className="w-full h-12 bg-slate-800 border-slate-700/50 rounded-2xl px-5 text-sm outline-none focus:border-blue-500 transition-all cursor-pointer appearance-none shadow-inner" value={form.size} onChange={e => setForm(f => ({ ...f, size: e.target.value }))}>
-                    {sizes.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Landing Protocol</label>
+                    <input className="w-full h-12 bg-slate-800 border-slate-700/50 rounded-2xl px-5 text-sm outline-none focus:border-blue-500 transition-all font-mono text-blue-400/80 shadow-inner" placeholder="https://external-site.com" value={form.targetUrl} onChange={e => setForm(f => ({ ...f, targetUrl: e.target.value }))} required />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Geometric Size</label>
+                    <select className="w-full h-12 bg-slate-800 border-slate-700/50 rounded-2xl px-5 text-sm outline-none focus:border-blue-500 transition-all cursor-pointer appearance-none shadow-inner" value={form.size} onChange={e => setForm(f => ({ ...f, size: e.target.value }))}>
+                      {sizes.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
                 </div>
                 <div className="pt-6 flex items-center gap-4 border-t border-white/5">
                   <button type="submit" className="flex-1 h-12 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black uppercase tracking-[0.2em] transition-all shadow-xl shadow-blue-600/20 active:scale-95 disabled:opacity-50" disabled={saving}>
