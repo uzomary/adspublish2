@@ -97,7 +97,8 @@ app.get('/impression', (req, res) => {
     // Check if banner is paused from cache (saving a Database Query!)
     if (bannerId) {
        const isActive = bannerActiveCache.get(bannerId);
-       if (isActive === false) return; 
+       // Ignore fake/deleted banners (undefined) or paused banners (false)
+       if (isActive === false || isActive === undefined) return; 
     }
 
     const ipAddress = req.ip || req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || 'unknown';
