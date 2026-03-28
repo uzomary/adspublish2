@@ -1,10 +1,11 @@
 import { Pool } from 'pg';
 
+// Disable SSL for local/VPS Postgres by setting DATABASE_SSL=false in your .env
+const sslEnabled = process.env.DATABASE_SSL !== 'false';
+
 const poolOptions = {
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+  ...(sslEnabled ? { ssl: { rejectUnauthorized: false } } : {}),
 };
 
 // Prevent connection exhaustion in Next.js API routes (Serverless/Development constraints)
