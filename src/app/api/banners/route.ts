@@ -9,9 +9,9 @@ export async function GET(request: Request) {
 
   try {
     let query = `SELECT b.*, c.name AS campaign_name,
-      COUNT(e.id) FILTER (WHERE e.type = 'IMPRESSION') AS impressions,
-      COUNT(DISTINCT e.ip_address) FILTER (WHERE e.type = 'IMPRESSION') AS unique_impressions,
-      COUNT(e.id) FILTER (WHERE e.type = 'CLICK') AS clicks
+      COUNT(CASE WHEN e.type = 'IMPRESSION' THEN e.id END) AS impressions,
+      COUNT(DISTINCT CASE WHEN e.type = 'IMPRESSION' THEN e.ip_address END) AS unique_impressions,
+      COUNT(CASE WHEN e.type = 'CLICK' THEN e.id END) AS clicks
       FROM banners b
       LEFT JOIN campaigns c ON c.id = b.campaign_id
       LEFT JOIN tracking_events e ON e.banner_id = b.id`;

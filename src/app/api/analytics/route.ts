@@ -15,12 +15,12 @@ export async function GET(request: Request) {
     // Summary totals
     const { rows: totalRows } = await db.query(
       `SELECT
-        COUNT(id) FILTER (WHERE type = 'IMPRESSION') AS total_impressions,
-        COUNT(DISTINCT ip_address) FILTER (WHERE type = 'IMPRESSION') AS unique_impressions,
-        COUNT(id) FILTER (WHERE type = 'CLICK') AS total_clicks,
-        COUNT(id) FILTER (WHERE type = 'VISIT') AS total_visits,
-        COUNT(DISTINCT ip_address) FILTER (WHERE type = 'VISIT') AS unique_visits,
-        COUNT(id) FILTER (WHERE type = 'ACTION') AS total_actions
+        COUNT(CASE WHEN type = 'IMPRESSION' THEN id END) AS total_impressions,
+        COUNT(DISTINCT CASE WHEN type = 'IMPRESSION' THEN ip_address END) AS unique_impressions,
+        COUNT(CASE WHEN type = 'CLICK' THEN id END) AS total_clicks,
+        COUNT(CASE WHEN type = 'VISIT' THEN id END) AS total_visits,
+        COUNT(DISTINCT CASE WHEN type = 'VISIT' THEN ip_address END) AS unique_visits,
+        COUNT(CASE WHEN type = 'ACTION' THEN id END) AS total_actions
        FROM tracking_events e
        WHERE e.created_at >= NOW() - (INTERVAL '1 day' * ${summaryDaysPlaceholder})
        ${campaignFilter}`,
@@ -34,11 +34,11 @@ export async function GET(request: Request) {
     const { rows: dailyRows } = await db.query(
       `SELECT
         DATE(created_at) AS date,
-        COUNT(id) FILTER (WHERE type = 'IMPRESSION') AS impressions,
-        COUNT(DISTINCT ip_address) FILTER (WHERE type = 'IMPRESSION') AS unique_impressions,
-        COUNT(id) FILTER (WHERE type = 'CLICK') AS clicks,
-        COUNT(id) FILTER (WHERE type = 'VISIT') AS visits,
-        COUNT(id) FILTER (WHERE type = 'ACTION') AS actions
+        COUNT(CASE WHEN type = 'IMPRESSION' THEN id END) AS impressions,
+        COUNT(DISTINCT CASE WHEN type = 'IMPRESSION' THEN ip_address END) AS unique_impressions,
+        COUNT(CASE WHEN type = 'CLICK' THEN id END) AS clicks,
+        COUNT(CASE WHEN type = 'VISIT' THEN id END) AS visits,
+        COUNT(CASE WHEN type = 'ACTION' THEN id END) AS actions
        FROM tracking_events e
        WHERE e.created_at >= NOW() - (INTERVAL '1 day' * ${chartDaysPlaceholder})
        ${campaignFilter}
@@ -50,9 +50,9 @@ export async function GET(request: Request) {
     // Top banners by clicks
     const { rows: topBanners } = await db.query(
       `SELECT b.id, b.name, b.image_url, b.target_url,
-        COUNT(e.id) FILTER (WHERE e.type = 'IMPRESSION') AS impressions,
-        COUNT(DISTINCT e.ip_address) FILTER (WHERE e.type = 'IMPRESSION') AS unique_impressions,
-        COUNT(e.id) FILTER (WHERE e.type = 'CLICK') AS clicks
+        COUNT(CASE WHEN e.type = 'IMPRESSION' THEN e.id END) AS impressions,
+        COUNT(DISTINCT CASE WHEN e.type = 'IMPRESSION' THEN e.ip_address END) AS unique_impressions,
+        COUNT(CASE WHEN e.type = 'CLICK' THEN e.id END) AS clicks
        FROM banners b
        LEFT JOIN tracking_events e ON e.banner_id = b.id
        GROUP BY b.id
