@@ -303,7 +303,7 @@ export default function BannersPage() {
                         <TableRow key={b.id} className="border-white/5 hover:bg-white/[0.01] transition-colors group">
                           <TableCell className="px-6 py-6 border-b border-white/5">
                             <div className="font-bold text-slate-200 group-hover:text-blue-400 transition-colors uppercase tracking-tight text-sm">{b.name}</div>
-                            <div className="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-widest opacity-60">{new URL(b.target_url).hostname}</div>
+                            <div className="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-widest opacity-60">{(() => { try { return new URL(b.target_url).hostname; } catch { return b.target_url; } })()}</div>
                           </TableCell>
                           <TableCell className="px-6 border-b border-white/5">
                             <Badge variant="outline" className="border-slate-800 bg-slate-900 text-slate-400 text-[9px] tracking-widest uppercase py-0.5 px-2">
