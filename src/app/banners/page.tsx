@@ -2,8 +2,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Sidebar from '@/components/Sidebar';
-import { 
-  Card, CardContent, CardHeader, CardTitle 
+import {
+  Card, CardContent, CardHeader, CardTitle
 } from "@/components/ui/card";
 import {
   Table,
@@ -57,7 +57,7 @@ function EmbedModal({ banner, baseUrl, onClose }: { banner: Banner; baseUrl: str
   <img src="${trackImprUrl}" width="1" height="1" style="display:none" alt="" />
 </a>`.trim();
 
-  const html = isFloating 
+  const html = isFloating
     ? `<!-- AdTrack Floating Banner: ${banner.name} -->
 <div id="adtrack-banner-${banner.id}" style="position:fixed;${getPositionStyles()}z-index:9999;line-height:0;margin:0;padding:0;">
   <button onclick="document.getElementById('adtrack-banner-${banner.id}').style.display='none'" style="position:absolute;top:-10px;right:-10px;width:24px;height:24px;border-radius:50%;border:none;background:#fff;color:#000;box-shadow:0 2px 4px rgba(0,0,0,0.2);cursor:pointer;font-weight:bold;font-size:14px;display:flex;align-items:center;justify-content:center;z-index:1;margin:0;padding:0;">×</button>
@@ -75,16 +75,16 @@ ${bannerHtml}`;
             Banner Embed Code
           </h2>
         </div>
-        
+
         <div className="p-8 space-y-6">
           <div className="bg-white/5 p-6 rounded-2xl border border-white/5 space-y-4">
             <div className="flex items-center gap-3">
-              <input 
-                type="checkbox" 
-                id="floating-toggle" 
+              <input
+                type="checkbox"
+                id="floating-toggle"
                 className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-blue-500"
-                checked={isFloating} 
-                onChange={e => setIsFloating(e.target.checked)} 
+                checked={isFloating}
+                onChange={e => setIsFloating(e.target.checked)}
               />
               <label htmlFor="floating-toggle" className="text-sm font-bold text-slate-200 cursor-pointer uppercase tracking-widest">Floating Interaction Mode</label>
             </div>
@@ -111,7 +111,7 @@ ${bannerHtml}`;
             </pre>
           </div>
         </div>
-        
+
         <div className="p-8 bg-slate-900/50 border-t border-white/5 flex items-center justify-end gap-3">
           <button className="h-10 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold transition-all shadow-lg shadow-blue-600/20" onClick={() => { navigator.clipboard.writeText(html); }}>Copy Snippet</button>
           <button className="h-10 px-6 rounded-xl bg-white/5 hover:bg-white/10 text-white text-sm font-bold border border-white/10 transition-all font-mono" onClick={onClose}>Dismiss</button>
@@ -140,10 +140,10 @@ export default function BannersPage() {
     Promise.all([
       fetch('/api/banners').then(r => r.json()),
       fetch('/api/campaigns').then(r => r.json()),
-    ]).then(([b, c]) => { 
-      setBanners(Array.isArray(b) ? b : []); 
-      setCampaigns(Array.isArray(c) ? c : []); 
-      setLoading(false); 
+    ]).then(([b, c]) => {
+      setBanners(Array.isArray(b) ? b : []);
+      setCampaigns(Array.isArray(c) ? c : []);
+      setLoading(false);
     }).catch(err => {
       console.error(err);
       setLoading(false);
@@ -176,14 +176,14 @@ export default function BannersPage() {
       const { data: { publicUrl } } = supabase.storage
         .from('banners')
         .getPublicUrl(filePath);
-      
+
       finalImageUrl = publicUrl;
     }
 
     if (!finalImageUrl) {
-        setAlert({ message: 'Please provide an image URL or upload a file.', type: 'error' });
-        setSaving(false);
-        return;
+      setAlert({ message: 'Please provide an image URL or upload a file.', type: 'error' });
+      setSaving(false);
+      return;
     }
 
     const res = await fetch(editingBanner ? `/api/banners/${editingBanner.id}` : '/api/banners', {
@@ -193,14 +193,14 @@ export default function BannersPage() {
     });
 
     if (res.ok) {
-        setAlert({ message: editingBanner ? 'Creative asset updated' : 'Banner deployed successfully', type: 'success' });
-        setShowCreate(false);
-        setEditingBanner(null);
-        setFile(null);
-        setForm({ name: '', imageUrl: '', targetUrl: '', size: '300x250', campaignId: '' });
-        load();
+      setAlert({ message: editingBanner ? 'Creative asset updated' : 'Banner deployed successfully', type: 'success' });
+      setShowCreate(false);
+      setEditingBanner(null);
+      setFile(null);
+      setForm({ name: '', imageUrl: '', targetUrl: '', size: '300x250', campaignId: '' });
+      load();
     } else {
-        setAlert({ message: 'Failed to save banner', type: 'error' });
+      setAlert({ message: 'Failed to save banner', type: 'error' });
     }
     setSaving(false);
   };
@@ -226,15 +226,15 @@ export default function BannersPage() {
       <Sidebar />
       <main className="flex-1 min-h-screen bg-background overflow-y-auto relative">
         {alert && (
-          <CustomAlert 
-            message={alert.message} 
-            type={alert.type} 
-            onClose={() => setAlert(null)} 
+          <CustomAlert
+            message={alert.message}
+            type={alert.type}
+            onClose={() => setAlert(null)}
           />
         )}
-        
+
         {confirmDelete && (
-          <ConfirmationBox 
+          <ConfirmationBox
             title="Delete Asset"
             description="Are you sure you want to permanently delete this creative asset? This action cannot be undone."
             onConfirm={() => handleDelete(confirmDelete)}
@@ -274,111 +274,111 @@ export default function BannersPage() {
           ) : (
             <Card className="border-slate-800/60 bg-slate-900/40 backdrop-blur-md shadow-xl rounded-2xl overflow-hidden">
               <div className="overflow-x-auto">
-              <Table>
-                <TableHeader className="bg-white/[0.01]">
-                  <TableRow className="border-white/5 hover:bg-transparent">
-                    <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 py-5 px-6 tracking-widest">Creative Detail</TableHead>
-                    <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 px-6 tracking-widest">Campaign</TableHead>
-                    <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 px-6 tracking-widest">Dimension</TableHead>
-                    <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 text-right px-6 tracking-widest">Total Impr</TableHead>
-                    <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 text-right px-6 tracking-widest">Unique Impr</TableHead>
-                    <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 px-6 tracking-widest">Insights</TableHead>
-                    <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 px-6 tracking-widest">Status</TableHead>
-                    <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 text-right px-6 tracking-widest">Manage</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {banners.map(b => {
-                    const imp = Number(b.impressions);
-                    const clk = Number(b.clicks);
-                    const ctr = imp > 0 ? ((clk / imp) * 100).toFixed(1) : '0.0';
-                    return (
-                      <TableRow key={b.id} className="border-white/5 hover:bg-white/[0.01] transition-colors group">
-                        <TableCell className="px-6 py-6 border-b border-white/5">
-                          <div className="font-bold text-slate-200 group-hover:text-blue-400 transition-colors uppercase tracking-tight text-sm">{b.name}</div>
-                          <div className="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-widest opacity-60">{new URL(b.target_url).hostname}</div>
-                        </TableCell>
-                        <TableCell className="px-6 border-b border-white/5">
-                          <Badge variant="outline" className="border-slate-800 bg-slate-900 text-slate-400 text-[9px] tracking-widest uppercase py-0.5 px-2">
-                            {b.campaign_name}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="px-6 border-b border-white/5 text-slate-400 font-mono text-[10px]">{b.size || '—'}</TableCell>
-                        <TableCell className="px-6 border-b border-white/5 text-right tabular-nums font-bold text-slate-200">{imp.toLocaleString()}</TableCell>
-                        <TableCell className="px-6 border-b border-white/5 text-right tabular-nums font-bold text-slate-200">{Number((b as any).unique_impressions || 0).toLocaleString()}</TableCell>
-                        <TableCell className="px-6 border-b border-white/5">
-                          <div className="flex flex-col gap-1.5">
-                            <div className="text-[9px] font-black text-slate-500 uppercase tracking-[0.1em]">{clk.toLocaleString()} CLICKS</div>
-                            <div className="w-24 h-1 bg-white/5 rounded-full overflow-hidden">
-                              <div className="h-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] transition-all duration-500" style={{ width: `${Math.min(Number(ctr) * 10, 100)}%` }} />
-                            </div>
-                            <span className="text-[10px] font-bold text-blue-400">{ctr}% CTR</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="px-6 border-b border-white/5">
-                          {b.is_active ? (
-                            imp > 0 ? (
-                              <div className="flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                                <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Active</span>
+                <Table>
+                  <TableHeader className="bg-white/[0.01]">
+                    <TableRow className="border-white/5 hover:bg-transparent">
+                      <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 py-5 px-6 tracking-widest">Creative Detail</TableHead>
+                      <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 px-6 tracking-widest">Campaign</TableHead>
+                      <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 px-6 tracking-widest">Dimension</TableHead>
+                      <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 text-right px-6 tracking-widest">Total Impr</TableHead>
+                      <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 text-right px-6 tracking-widest">Unique Impr</TableHead>
+                      <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 px-6 tracking-widest">Insights</TableHead>
+                      <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 px-6 tracking-widest">Status</TableHead>
+                      <TableHead className="text-[10px] uppercase font-extrabold text-slate-500 text-right px-6 tracking-widest">Manage</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {banners.map(b => {
+                      const imp = Number(b.impressions);
+                      const clk = Number(b.clicks);
+                      const ctr = imp > 0 ? ((clk / imp) * 100).toFixed(1) : '0.0';
+                      return (
+                        <TableRow key={b.id} className="border-white/5 hover:bg-white/[0.01] transition-colors group">
+                          <TableCell className="px-6 py-6 border-b border-white/5">
+                            <div className="font-bold text-slate-200 group-hover:text-blue-400 transition-colors uppercase tracking-tight text-sm">{b.name}</div>
+                            <div className="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-widest opacity-60">{new URL(b.target_url).hostname}</div>
+                          </TableCell>
+                          <TableCell className="px-6 border-b border-white/5">
+                            <Badge variant="outline" className="border-slate-800 bg-slate-900 text-slate-400 text-[9px] tracking-widest uppercase py-0.5 px-2">
+                              {b.campaign_name}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="px-6 border-b border-white/5 text-slate-400 font-mono text-[10px]">{b.size || '—'}</TableCell>
+                          <TableCell className="px-6 border-b border-white/5 text-right tabular-nums font-bold text-slate-200">{imp.toLocaleString()}</TableCell>
+                          <TableCell className="px-6 border-b border-white/5 text-right tabular-nums font-bold text-slate-200">{Number((b as any).unique_impressions || 0).toLocaleString()}</TableCell>
+                          <TableCell className="px-6 border-b border-white/5">
+                            <div className="flex flex-col gap-1.5">
+                              <div className="text-[9px] font-black text-slate-500 uppercase tracking-[0.1em]">{clk.toLocaleString()} CLICKS</div>
+                              <div className="w-24 h-1 bg-white/5 rounded-full overflow-hidden">
+                                <div className="h-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] transition-all duration-500" style={{ width: `${Math.min(Number(ctr) * 10, 100)}%` }} />
                               </div>
+                              <span className="text-[10px] font-bold text-blue-400">{ctr}% CTR</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="px-6 border-b border-white/5">
+                            {b.is_active ? (
+                              imp > 0 ? (
+                                <div className="flex items-center gap-2">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                                  <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Active</span>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                                  <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest">Live</span>
+                                </div>
+                              )
                             ) : (
                               <div className="flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
-                                <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest">Live</span>
+                                <div className="w-1.5 h-1.5 rounded-full bg-slate-700" />
+                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Paused</span>
                               </div>
-                            )
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              <div className="w-1.5 h-1.5 rounded-full bg-slate-700" />
-                              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Paused</span>
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell className="px-6 border-b border-white/5 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <button 
-                              className={cn(
-                                "h-8 px-4 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all",
-                                b.is_active ? "bg-white/5 hover:bg-white/10 text-slate-300" : "bg-blue-600 hover:bg-blue-500 text-white"
-                              )}
-                              onClick={async () => {
-                                await fetch(`/api/banners/${b.id}`, {
-                                  method: 'PUT',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ ...b, isActive: !b.is_active })
+                            )}
+                          </TableCell>
+                          <TableCell className="px-6 border-b border-white/5 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                className={cn(
+                                  "h-8 px-4 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all",
+                                  b.is_active ? "bg-white/5 hover:bg-white/10 text-slate-300" : "bg-blue-600 hover:bg-blue-500 text-white"
+                                )}
+                                onClick={async () => {
+                                  await fetch(`/api/banners/${b.id}`, {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ ...b, isActive: !b.is_active })
+                                  });
+                                  load();
+                                }}
+                              >
+                                {b.is_active ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                              </button>
+                              <button className="h-8 w-8 rounded-lg bg-white/5 hover:bg-blue-500/20 text-slate-400 hover:text-blue-400 transition-all flex items-center justify-center" onClick={() => {
+                                setEditingBanner(b);
+                                setForm({
+                                  name: b.name,
+                                  imageUrl: b.image_url,
+                                  targetUrl: b.target_url,
+                                  size: b.size,
+                                  campaignId: b.campaign_id
                                 });
-                                load();
-                              }}
-                            >
-                              {b.is_active ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-                            </button>
-                             <button className="h-8 w-8 rounded-lg bg-white/5 hover:bg-blue-500/20 text-slate-400 hover:text-blue-400 transition-all flex items-center justify-center" onClick={() => {
-                               setEditingBanner(b);
-                               setForm({
-                                 name: b.name,
-                                 imageUrl: b.image_url,
-                                 targetUrl: b.target_url,
-                                 size: b.size,
-                                 campaignId: b.campaign_id
-                               });
-                               setShowCreate(true);
-                             }}>
-                               <Pencil className="w-3.5 h-3.5" />
-                             </button>
-                             <button className="h-8 w-8 rounded-lg bg-white/5 hover:bg-blue-500/20 text-slate-400 hover:text-blue-400 transition-all flex items-center justify-center" onClick={() => setEmbedBanner(b)}>
-                               <Code2 className="w-3.5 h-3.5" />
-                             </button>
-                            <button className="h-8 w-8 rounded-lg bg-white/5 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition-all flex items-center justify-center" onClick={() => setConfirmDelete(b.id)}>
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                                setShowCreate(true);
+                              }}>
+                                <Pencil className="w-3.5 h-3.5" />
+                              </button>
+                              <button className="h-8 w-8 rounded-lg bg-white/5 hover:bg-blue-500/20 text-slate-400 hover:text-blue-400 transition-all flex items-center justify-center" onClick={() => setEmbedBanner(b)}>
+                                <Code2 className="w-3.5 h-3.5" />
+                              </button>
+                              <button className="h-8 w-8 rounded-lg bg-white/5 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition-all flex items-center justify-center" onClick={() => setConfirmDelete(b.id)}>
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
               </div>
             </Card>
           )}
@@ -414,12 +414,12 @@ export default function BannersPage() {
                     Visual Blueprint
                     <span className="text-blue-500/60 lowercase font-bold">upload or stream</span>
                   </label>
-                  
+
                   <div className="flex items-center gap-3">
-                    <input 
-                      type="file" 
+                    <input
+                      type="file"
                       id="banner-file-input"
-                      accept="image/*" 
+                      accept="image/*"
                       onChange={e => {
                         const newFile = e.target.files?.[0] || null;
                         setFile(newFile);
@@ -428,13 +428,13 @@ export default function BannersPage() {
                       className="block w-full text-[10px] text-slate-400 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:uppercase file:bg-blue-600 file:text-white hover:file:bg-blue-500 file:transition-all cursor-pointer file:tracking-widest"
                     />
                     {file && (
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={() => {
                           setFile(null);
                           const input = document.getElementById('banner-file-input') as HTMLInputElement;
                           if (input) input.value = '';
-                        }} 
+                        }}
                         className="h-9 px-4 rounded-xl bg-rose-500/20 text-rose-500 text-[9px] font-black uppercase tracking-widest hover:bg-rose-500/30 transition-all border border-rose-500/20"
                       >
                         Clear
@@ -443,15 +443,15 @@ export default function BannersPage() {
                   </div>
 
                   <div className="flex items-center gap-4 opacity-20">
-                      <div className="h-px flex-1 bg-white" />
-                      <span className="text-[8px] font-black text-white uppercase tracking-widest">OR</span>
-                      <div className="h-px flex-1 bg-white" />
+                    <div className="h-px flex-1 bg-white" />
+                    <span className="text-[8px] font-black text-white uppercase tracking-widest">OR</span>
+                    <div className="h-px flex-1 bg-white" />
                   </div>
 
-                  <input 
-                    className="w-full h-11 bg-slate-800/40 border-slate-700/30 rounded-xl px-5 text-[11px] font-mono outline-none focus:border-blue-500/50 transition-all shadow-inner placeholder:text-slate-700 disabled:opacity-30" 
-                    placeholder="Direct URL (static/animated)..." 
-                    value={form.imageUrl} 
+                  <input
+                    className="w-full h-11 bg-slate-800/40 border-slate-700/30 rounded-xl px-5 text-[11px] font-mono outline-none focus:border-blue-500/50 transition-all shadow-inner placeholder:text-slate-700 disabled:opacity-30"
+                    placeholder="Direct URL (static/animated)..."
+                    value={form.imageUrl}
                     onChange={e => {
                       setForm(f => ({ ...f, imageUrl: e.target.value }));
                       if (e.target.value && file) {
@@ -459,7 +459,7 @@ export default function BannersPage() {
                         const input = document.getElementById('banner-file-input') as HTMLInputElement;
                         if (input) input.value = '';
                       }
-                    }} 
+                    }}
                     disabled={!!file}
                   />
                 </div>
