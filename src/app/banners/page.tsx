@@ -38,8 +38,8 @@ function EmbedModal({ banner, baseUrl, onClose }: { banner: Banner; baseUrl: str
   const [isFloating, setIsFloating] = useState(false);
   const [position, setPosition] = useState('bottom-right');
   const trackerBaseUrl = process.env.NEXT_PUBLIC_TRACKER_URL || baseUrl;
-  const trackClickUrl = `${baseUrl}/api/track/click?bannerId=${banner.id}`;
-  const trackImprUrl = `${trackerBaseUrl}/api/track/impression?bannerId=${banner.id}`;
+  const trackClickUrl = `${trackerBaseUrl}/click?bannerId=${banner.id}`;
+  const trackImprUrl = `${trackerBaseUrl}/impression?bannerId=${banner.id}`;
 
   const getPositionStyles = () => {
     switch (position) {

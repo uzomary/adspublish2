@@ -114,6 +114,37 @@ app.get('/impression', (req, res) => {
   }
 });
 
+// Click Tracking Route GET /click
+app.get('/click', async (req, res) => {
+  const bannerId = req.query.bannerId;
+  if (!bannerId) return res.status(400).send('Missing ID');
+
+  try {
+    const { rows } = await pool.query(
+      `SELECT target_url, campaign_id FROM banners WHERE id = $1`,
+      [bannerId]
+    );
+
+    if (rows.length === 0) return res.status(404).send('Not Found');
+    const { target_url, campaign_id } = rows[0];
+
+    // Log click as a separate event (clicks are lower volume so we can INSERT immediately)
+    const ipAddress = req.ip || req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || 'unknown';
+    const userAgent = req.headers['user-agent'] || 'unknown';
+
+    await pool.query(
+      `INSERT INTO tracking_events (id, type, banner_id, campaign_id, ip_address, user_agent, created_at) 
+       VALUES ($1, 'CLICK', $2, $3, $4, $5, NOW())`,
+      [crypto.randomUUID(), bannerId, campaign_id, ipAddress.toString().split(',')[0].trim(), userAgent.substring(0, 255)]
+    );
+
+    res.redirect(target_url);
+  } catch (e) {
+    console.error('Click error:', e);
+    res.status(500).send('Server Error');
+  }
+});
+
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`🚀 Tracker microservice running on port ${PORT}`);
