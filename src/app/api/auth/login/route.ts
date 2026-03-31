@@ -62,8 +62,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error("Critical Login Error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Internal server error (Database or API Failure)" },
       { status: 500 }
     );
   }

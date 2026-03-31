@@ -8,7 +8,8 @@ export async function GET() {
     const [admins] = await query("SELECT id FROM admins LIMIT 1") as [any[], any];
     return NextResponse.json({ setupRequired: admins.length === 0 });
   } catch (error) {
-    return NextResponse.json({ error: "Database error" }, { status: 500 });
+    console.error("Critical Setup Audit Error:", error);
+    return NextResponse.json({ error: "Database connectivity error" }, { status: 500 });
   }
 }
 
