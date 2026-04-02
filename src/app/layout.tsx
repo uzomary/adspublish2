@@ -1,18 +1,26 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Providers } from "@/components/Providers";
+import { cn } from "../lib/utils";
+
+import { TooltipProvider } from "@/components/ui/tooltip";
+
+import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
-  title: "Ads Dashboard",
-  description: "Manage your stakerschoice ads",
+  title: "Stakers Choice Ads – Ads Tracking Platform",
+  description: "Monitor impressions, clicks, visits and actions across your ad campaigns",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
+    <html lang="en" className={cn("h-full", "font-sans")} suppressHydrationWarning>
+      <body className="h-full bg-background text-foreground antialiased">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
           <TooltipProvider>
             {children}
           </TooltipProvider>
