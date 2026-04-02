@@ -100,7 +100,7 @@ export default function SetupPage() {
             </div>
             <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 backdrop-blur-sm">
                <div className="text-[10px] font-black uppercase tracking-widest text-indigo-500 mb-1">Database</div>
-               <div className="text-xs text-slate-500 font-bold">Supabase Postgres</div>
+               <div className="text-xs text-slate-500 font-bold">VPS Postgres</div>
             </div>
           </div>
         </div>
